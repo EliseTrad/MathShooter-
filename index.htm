@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>CSIS250 GameEngine</title>
+  </head>
+  <body style="margin: 0; background-color: gray">
+    <canvas
+      id="canvas"
+      style="background-color: white; display: block"
+    ></canvas>
+
+    <script>
+      const canvas = document.getElementById('canvas');
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+    </script>
+
+    <script src="js/game.js"></script>
+
+    <script src="js/sprites.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/gameElements.js"></script>
+    <script src="js/hud.js"></script>
+    <script src="js/menuLevel.js"></script>
+    <script src="js/level1.js"></script>
+    <script src="js/level2.js"></script>
+    <script src="js/level3.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
