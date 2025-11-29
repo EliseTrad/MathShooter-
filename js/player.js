@@ -21,8 +21,6 @@ class Player extends Sprite {
     this.totalShieldsPurchased = 0; // Track total shields bought
     this.shootSound = new SoundManager('assets/sounds/jump.wav');
     this.invincibilityTimer = 0; // Prevent repeated damage
-    // Track scores for each level: {level: {correct, total}}
-    this.levelScores = {};
   }
 
   getShieldCost() {
@@ -149,6 +147,12 @@ class Player extends Sprite {
   }
 
   takeDamage(sprites) {
+    // Don't take damage if game is already over
+    const gameOver = sprites.find(
+      (sprite) => sprite instanceof Win || sprite instanceof Lose
+    );
+    if (gameOver) return;
+
     if (this.hasShield) {
       this.hasShield = false;
     } else {

@@ -24,7 +24,6 @@ class GameplayLevel extends Level {
       player.stars = existingPlayer.stars;
       player.hasShield = existingPlayer.hasShield;
       player.totalShieldsPurchased = existingPlayer.totalShieldsPurchased;
-      player.levelScores = existingPlayer.levelScores || {};
     }
 
     // Set player position immediately

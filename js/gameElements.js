@@ -15,6 +15,14 @@ class Number extends Sprite {
   update(sprites, keys) {
     if (this.deleted) return true;
 
+    // Stop moving if game is over
+    const gameOver = sprites.find(
+      (sprite) => sprite instanceof Win || sprite instanceof Lose
+    );
+    if (gameOver) {
+      return false;
+    }
+
     this.y += this.speed;
 
     if (this.y + this.height >= game.canvas.height) {
@@ -95,26 +103,32 @@ class Number extends Sprite {
           )
         );
       } else {
-        const lives = game.sprites.find((sprite) => sprite instanceof Lives);
-        if (lives) {
-          lives.removeOneLife();
-          // Show negative feedback
-          const messages = ['Hard Luck!', 'Oops!', 'Try Again!', 'Miss!'];
-          const randomMessage =
-            messages[Math.floor(Math.random() * messages.length)];
-          game.sprites.push(
-            new FeedbackText(
-              this.x + this.width / 2,
-              this.y,
-              randomMessage,
-              '#FF0000'
-            )
-          );
-
-          if (lives.lives <= 0) {
+        // Don't trigger lose if game already won or lost
+        const gameOver = game.sprites.find(
+          (sprite) => sprite instanceof Win || sprite instanceof Lose
+        );
+        if (!gameOver) {
+          const lives = game.sprites.find((sprite) => sprite instanceof Lives);
+          if (lives) {
+            lives.removeOneLife();
+            // Show negative feedback
+            const messages = ['Hard Luck!', 'Oops!', 'Try Again!', 'Miss!'];
+            const randomMessage =
+              messages[Math.floor(Math.random() * messages.length)];
             game.sprites.push(
-              new Lose(game.canvas.width / 2, game.canvas.height / 2)
+              new FeedbackText(
+                this.x + this.width / 2,
+                this.y,
+                randomMessage,
+                '#FF0000'
+              )
             );
+
+            if (lives.lives <= 0) {
+              game.sprites.push(
+                new Lose(game.canvas.width / 2, game.canvas.height / 2)
+              );
+            }
           }
         }
 
@@ -260,6 +274,14 @@ class EquationDisplay extends Sprite {
         this.answer = this.num1 * this.num2;
         break;
     }
+
+    // Update all existing falling numbers to match new correct answer
+    const allNumbers = game.sprites.filter(
+      (sprite) => sprite instanceof Number
+    );
+    allNumbers.forEach((number) => {
+      number.isCorrect = number.value === this.answer;
+    });
   }
   getCorrectAnswer() {
     return this.answer;
@@ -382,6 +404,14 @@ class NumberGenerator extends Sprite {
   }
 
   update(sprites, keys) {
+    // Stop spawning if game is over
+    const gameOver = sprites.find(
+      (sprite) => sprite instanceof Win || sprite instanceof Lose
+    );
+    if (gameOver) {
+      return false;
+    }
+
     this.spawnCounter++;
 
     const currentNumbers = sprites.filter(
@@ -453,15 +483,6 @@ class NumberGenerator extends Sprite {
     this.correctAnswersCount++;
 
     if (this.correctAnswersCount >= this.targetCorrectAnswers) {
-      // Save level score to player
-      const player = game.sprites.find((sprite) => sprite instanceof Player);
-      if (player) {
-        player.levelScores[this.level] = {
-          correct: this.correctAnswersCount,
-          total: this.questionsAsked,
-        };
-      }
-
       switch (this.level) {
         case 1:
           game.changeLevel(5);
@@ -476,9 +497,13 @@ class NumberGenerator extends Sprite {
           break;
       }
     } else if (this.questionsAsked >= this.totalQuestions) {
-      game.sprites.push(
-        new Lose(game.canvas.width / 2, game.canvas.height / 2)
-      );
+      // Don't trigger lose if game already won
+      const hasWon = game.sprites.find((sprite) => sprite instanceof Win);
+      if (!hasWon) {
+        game.sprites.push(
+          new Lose(game.canvas.width / 2, game.canvas.height / 2)
+        );
+      }
     }
   }
 
