@@ -1,38 +1,18 @@
-class Level1 extends Level {
+class Level1 extends GameplayLevel {
   constructor(game) {
     super(game);
   }
 
   initialize() {
-    // Background music
-    this.game.addSprite(new BackgroundMusic());
-
-    // Player - preserve existing player data if transitioning from another level
-    const existingPlayer = this.game.sprites.find(
-      (sprite) => sprite instanceof Player
-    );
-    const player = new Player(0, 0, 40, 40, 5);
-    if (existingPlayer) {
-      player.stars = existingPlayer.stars;
-      player.hasShield = existingPlayer.hasShield;
-      player.totalShieldsPurchased = existingPlayer.totalShieldsPurchased;
-    }
-    // Position player at center bottom after canvas is sized
+    this.levelNumber = 1;
+    this.initializeCommonElements();
+    this.addGameElements(1);
     setTimeout(() => {
-      player.x = (this.game.canvas.width - player.width) / 2;
-      player.y = this.game.canvas.height - 100;
-      player.groundY = player.y;
-    }, 100);
-    this.game.addSprite(player);
-
-    // HUD Elements
-    this.game.addSprite(new Lives(30, 50));
-    this.game.addSprite(new Stars(30, 90));
-    this.game.addSprite(new ShieldButton(30, 120)); // Shield purchase button
-    this.game.addSprite(new ShieldConversionButton(30, 170)); // Shield conversion button
-
-    // Game Elements
-    this.game.addSprite(new EquationDisplay(50, 50, 1));
-    this.game.addSprite(new NumberGenerator(1));
+      const campfire = new CampfireAnimation(
+        this.game.canvas.width / 2 + 120,
+        30
+      );
+      this.game.addSprite(campfire);
+    }, PLAYER_POSITION_DELAY);
   }
 }

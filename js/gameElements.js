@@ -6,8 +6,8 @@ class Number extends Sprite {
     this.value = value;
     this.isCorrect = isCorrect;
     this.speed = speed;
-    this.width = 40;
-    this.height = 40;
+    this.width = NUMBER_WIDTH;
+    this.height = NUMBER_HEIGHT;
     this.deleted = false;
     this.hitSound = new SoundManager('assets/sounds/jump.wav');
   }
@@ -28,13 +28,7 @@ class Number extends Sprite {
   hitByBullet() {
     this.deleted = true;
 
-    // Debug: Log what was hit
-    console.log(`Hit number ${this.value}, isCorrect: ${this.isCorrect}`);
-
     if (this.isCorrect) {
-      console.log(
-        'Correct answer hit! Adding star and generating new equation.'
-      );
       const player = game.sprites.find((sprite) => sprite instanceof Player);
       if (player) {
         player.addStars(1);
@@ -51,50 +45,64 @@ class Number extends Sprite {
         (sprite) => sprite instanceof NumberGenerator
       );
       if (generator) {
+        generator.questionsAsked++;
         generator.onCorrectAnswerHit();
       }
     } else {
-      console.log('Wrong answer hit! Losing a life.');
-
-      // Penalty: Lose a life
-      const lives = game.sprites.find((sprite) => sprite instanceof Lives);
-      if (lives) {
-        lives.removeOneLife();
-        console.log(`Player now has ${lives.lives} lives`);
-        if (lives.lives <= 0) {
-          game.sprites.push(
-            new Lose(game.canvas.width / 2, game.canvas.height / 2)
-          );
-        }
-      }
-
-      const generator = game.sprites.find(
+      let wrongGenerator = game.sprites.find(
         (sprite) => sprite instanceof NumberGenerator
       );
+      if (wrongGenerator) {
+        wrongGenerator.questionsAsked++;
+      }
 
-      // Level 2+: Also spawn 2 extra numbers as additional penalty
-      if (generator && generator.level >= 2) {
-        console.log('Level 2+: Also spawning 2 extra numbers.');
-        const equation = game.sprites.find(
-          (sprite) => sprite instanceof EquationDisplay
+      const equation = game.sprites.find(
+        (sprite) => sprite instanceof EquationDisplay
+      );
+      if (equation) {
+        equation.generateNewEquation();
+      }
+
+      const player = game.sprites.find((sprite) => sprite instanceof Player);
+      if (player && player.hasShield) {
+        player.hasShield = false;
+      } else {
+        const lives = game.sprites.find((sprite) => sprite instanceof Lives);
+        if (lives) {
+          lives.removeOneLife();
+          if (lives.lives <= 0) {
+            game.sprites.push(
+              new Lose(game.canvas.width / 2, game.canvas.height / 2)
+            );
+          }
+        }
+
+        const generator = game.sprites.find(
+          (sprite) => sprite instanceof NumberGenerator
         );
-        const correctAnswer = equation ? equation.getCorrectAnswer() : 10;
 
-        // Spawn 2 more wrong numbers as penalty
-        for (let i = 0; i < 2; i++) {
-          const randomX = Math.random() * (game.canvas.width - 40);
-          const minWrong = Math.max(1, correctAnswer - 5);
-          const maxWrong = correctAnswer + 5;
-          let wrongValue;
-
-          do {
-            wrongValue =
-              Math.floor(Math.random() * (maxWrong - minWrong + 1)) + minWrong;
-          } while (wrongValue === correctAnswer);
-
-          game.sprites.push(
-            new Number(randomX, -40, wrongValue, false, generator.numberSpeed)
+        if (generator && generator.level >= 2) {
+          const equation = game.sprites.find(
+            (sprite) => sprite instanceof EquationDisplay
           );
+          const correctAnswer = equation ? equation.getCorrectAnswer() : 10;
+
+          for (let i = 0; i < 2; i++) {
+            const randomX = Math.random() * (game.canvas.width - 40);
+            const minWrong = Math.max(1, correctAnswer - 5);
+            const maxWrong = correctAnswer + 5;
+            let wrongValue;
+
+            do {
+              wrongValue =
+                Math.floor(Math.random() * (maxWrong - minWrong + 1)) +
+                minWrong;
+            } while (wrongValue === correctAnswer);
+
+            game.sprites.push(
+              new Number(randomX, -40, wrongValue, false, generator.numberSpeed)
+            );
+          }
         }
       }
     }
@@ -110,30 +118,36 @@ class Number extends Sprite {
       (sprite) => sprite instanceof NumberGenerator
     );
 
-    // Level 1: Numbers just disappear - beginner friendly!
-    // Level 2+: Correct answers become obstacles
     if (this.isCorrect && generator && generator.level >= 2) {
-      // Check if there's already an obstacle at this position (within 50px)
       const existingObstacle = sprites.find(
         (sprite) =>
-          sprite instanceof Obstacle && Math.abs(sprite.x - this.x) < 50
+          sprite instanceof Obstacle &&
+          Math.abs(sprite.x - this.x) < OBSTACLE_SPACING_MIN
       );
 
       if (!existingObstacle) {
-        // Get player's ground Y position to place obstacle at same level
         const player = game.sprites.find((sprite) => sprite instanceof Player);
-        const obstacleY = player ? player.groundY : game.canvas.height - 100;
-        sprites.push(new Obstacle(this.x, obstacleY, 40, 40));
-        console.log('Correct answer missed! Obstacle created at x=' + this.x);
-      } else {
-        console.log('Obstacle already exists nearby, skipping creation.');
+        const obstacleY = player
+          ? player.groundY
+          : game.canvas.height - PLAYER_GROUND_OFFSET;
+        const obstacleSpeed = generator.level === 3 ? 3.0 : 1.5;
+        sprites.push(
+          new Obstacle(
+            this.x,
+            obstacleY,
+            OBSTACLE_WIDTH,
+            OBSTACLE_HEIGHT,
+            obstacleSpeed,
+            generator.level
+          )
+        );
       }
     }
   }
 
   draw(ctx) {
     // All numbers have the same color - no hints!
-    ctx.fillStyle = 'lightblue';
+    ctx.fillStyle = '#FFB6C1';
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     ctx.strokeStyle = 'black';
@@ -221,15 +235,15 @@ class EquationDisplay extends Sprite {
     const boxWidth = 200;
     const boxX = (game.canvas.width - boxWidth) / 2;
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillStyle = 'rgba(255, 192, 203, 0.9)';
     ctx.fillRect(boxX - 10, this.y - 30, boxWidth, 50);
 
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.strokeRect(boxX - 10, this.y - 30, boxWidth, 50);
 
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = '#FF1493';
+    ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(equation, game.canvas.width / 2, this.y);
@@ -242,30 +256,47 @@ class NumberGenerator extends Sprite {
     this.level = level;
     this.spawnCounter = 0;
     this.correctAnswersCount = 0;
+    this.questionsAsked = 0;
     this.targetCorrectAnswers = this.getTargetCorrectAnswers();
+    this.totalQuestions = this.getTotalQuestions();
     this.maxNumbersOnScreen = this.getMaxNumbers();
     this.spawnRate = this.getSpawnRate();
     this.numberSpeed = this.getNumberSpeed();
-    this.maxObstacles = level >= 2 ? 8 : 0; // Limit obstacles to prevent impossible scenarios
+    this.maxObstacles = level >= 2 ? MAX_OBSTACLES_LEVEL_2_PLUS : 0;
   }
 
   getTargetCorrectAnswers() {
     switch (this.level) {
       case 1:
-        return 5; // Level 1: 5 correct answers to complete
+        return 5; // Level 1: 5 correct answers to complete (out of 10 questions)
       case 2:
-        return 10; // Level 2: 10 correct answers to complete
+        return 10; // Level 2: 10 correct answers to complete (out of 15 questions)
       case 3:
-        return 15; // Level 3: 15 correct answers to complete
+        return 15; // Level 3: 15 correct answers to complete (out of 20 questions)
       default:
         return 5;
+    }
+  }
+
+  getTotalQuestions() {
+    switch (this.level) {
+      case 1:
+        return 10; // Level 1: 10 total questions
+      case 2:
+        return 15; // Level 2: 15 total questions
+      case 3:
+        return 20; // Level 3: 20 total questions
+      default:
+        return 10;
     }
   }
 
   setLevel(level) {
     this.level = level;
     this.correctAnswersCount = 0;
+    this.questionsAsked = 0;
     this.targetCorrectAnswers = this.getTargetCorrectAnswers();
+    this.totalQuestions = this.getTotalQuestions();
     this.maxNumbersOnScreen = this.getMaxNumbers();
     this.spawnRate = this.getSpawnRate();
     this.numberSpeed = this.getNumberSpeed();
@@ -326,16 +357,15 @@ class NumberGenerator extends Sprite {
       (sprite) => sprite instanceof Number
     ).length;
 
-    // Check obstacle count and remove oldest if at limit
     const obstacles = sprites.filter((sprite) => sprite instanceof Obstacle);
     if (obstacles.length > this.maxObstacles) {
-      obstacles[0].deleted = true; // Remove oldest obstacle
-      console.log('Max obstacles reached, removing oldest.');
+      obstacles[0].deleted = true;
     }
 
     if (
       this.spawnCounter >= this.spawnRate &&
-      currentNumbers < this.maxNumbersOnScreen
+      currentNumbers < this.maxNumbersOnScreen &&
+      this.questionsAsked < this.totalQuestions
     ) {
       this.spawnNumber(sprites);
       this.spawnCounter = 0;
@@ -383,25 +413,28 @@ class NumberGenerator extends Sprite {
       } while (value === correctAnswer);
     }
 
-    sprites.push(new Number(randomX, -40, value, isCorrect, this.numberSpeed));
+    sprites.push(
+      new Number(randomX, -NUMBER_HEIGHT, value, isCorrect, this.numberSpeed)
+    );
   }
 
   onCorrectAnswerHit() {
     this.correctAnswersCount++;
 
     if (this.correctAnswersCount >= this.targetCorrectAnswers) {
-      // Level 1 completed - advance to Level 2
       if (this.level === 1) {
-        console.log('Level 1 Complete! Moving to Level 2...');
-        game.changeLevel(2);
+        game.changeLevel(5);
       } else if (this.level === 2) {
-        // Level 2 completed - advance to Level 3
-        console.log('Level 2 Complete! Moving to Level 3...');
-        game.changeLevel(3);
+        game.changeLevel(6);
       } else {
-        console.log('Level 3 Complete! You win!');
-        // Could add a win screen here
+        game.sprites.push(
+          new Win(game.canvas.width / 2, game.canvas.height / 2)
+        );
       }
+    } else if (this.questionsAsked >= this.totalQuestions) {
+      game.sprites.push(
+        new Lose(game.canvas.width / 2, game.canvas.height / 2)
+      );
     }
   }
 
@@ -411,29 +444,78 @@ class NumberGenerator extends Sprite {
     ctx.textAlign = 'right';
     ctx.fillText(`Level: ${this.level}`, game.canvas.width - 30, 40);
     ctx.fillText(
-      `Progress: ${this.correctAnswersCount}/${this.targetCorrectAnswers}`,
+      `Correct: ${this.correctAnswersCount}/${this.targetCorrectAnswers}`,
       game.canvas.width - 30,
       60
+    );
+    ctx.fillText(
+      `Questions: ${this.questionsAsked}/${this.totalQuestions}`,
+      game.canvas.width - 30,
+      80
     );
   }
 }
 
 class Obstacle extends Sprite {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, speed = 1.5, level = 2) {
     super();
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.speed = speed;
+    this.level = level;
     this.deleted = false;
+    this.direction = null; // Will be set once: 1 for right, -1 for left
   }
 
   update(sprites, keys) {
+    if (this.direction === null) {
+      const player = game.sprites.find((sprite) => sprite instanceof Player);
+      if (player) {
+        this.direction = this.x < player.x ? 1 : -1;
+      } else {
+        this.direction = 1;
+      }
+    }
+
+    this.x += this.speed * this.direction;
+
+    const player = game.sprites.find((sprite) => sprite instanceof Player);
+
+    if (player) {
+      const horizontalCollision = Math.abs(this.x - player.x) < this.width;
+      const verticalCollision = Math.abs(this.y - player.y) < this.height;
+
+      if (horizontalCollision && verticalCollision) {
+        // Check if player has shield
+        if (player.hasShield) {
+          player.hasShield = false;
+        } else {
+          const lives = game.sprites.find((sprite) => sprite instanceof Lives);
+          if (lives) {
+            lives.removeOneLife();
+            if (lives.lives <= 0) {
+              game.sprites.push(
+                new Lose(game.canvas.width / 2, game.canvas.height / 2)
+              );
+            }
+          }
+        }
+
+        this.deleted = true;
+      }
+    }
+
+    if (this.x < -this.width || this.x > game.canvas.width) {
+      this.deleted = true;
+    }
+
     return this.deleted;
   }
 
   draw(ctx) {
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = '#FF69B4';
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     ctx.strokeStyle = 'black';

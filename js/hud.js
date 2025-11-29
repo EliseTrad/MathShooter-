@@ -5,7 +5,6 @@ class ShieldButton extends Sprite {
     this.y = y;
     this.width = 140;
     this.height = 40;
-    this.cost = 15;
   }
 
   update(sprites, keys, mouse) {
@@ -33,21 +32,26 @@ class ShieldButton extends Sprite {
     const player = game.sprites.find((sprite) => sprite instanceof Player);
     if (!player) return;
 
-    const canAfford = player.stars >= this.cost;
+    const cost = player.shieldCost; // Use player's dynamic shield cost
+    const canAfford = player.stars >= cost;
     const hasShield = player.hasShield;
 
     // Button background
     if (hasShield) {
-      ctx.fillStyle = 'rgba(0, 150, 150, 0.5)'; // Disabled when shield active
+      ctx.fillStyle = 'rgba(194, 86, 170, 0.5)'; // Disabled when shield active
     } else if (canAfford) {
-      ctx.fillStyle = 'rgba(0, 200, 0, 0.8)'; // Green when affordable
+      ctx.fillStyle = 'rgba(49, 8, 40, 0.8)'; // Green when affordable
     } else {
-      ctx.fillStyle = 'rgba(100, 100, 100, 0.5)'; // Gray when can't afford
+      ctx.fillStyle = 'rgba(212, 23, 149, 0.5)'; // Gray when can't afford
     }
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     // Button border
-    ctx.strokeStyle = hasShield ? 'cyan' : canAfford ? 'darkgreen' : 'gray';
+    ctx.strokeStyle = hasShield
+      ? '#580758ff'
+      : canAfford
+      ? '#aa0c63ff'
+      : '#D8BFD8';
     ctx.lineWidth = 3;
     ctx.strokeRect(this.x, this.y, this.width, this.height);
 
@@ -56,7 +60,7 @@ class ShieldButton extends Sprite {
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const text = hasShield ? 'Shield Active!' : `Buy Shield (${this.cost}★)`;
+    const text = hasShield ? 'Shield Active!' : `Buy Shield (${cost})`;
     ctx.fillText(text, this.x + this.width / 2, this.y + this.height / 2);
   }
 }
@@ -80,22 +84,19 @@ class Lives extends Sprite {
 
   addLife() {
     this.lives++;
-    console.log('Life added! Total lives: ' + this.lives);
   }
 
   draw(ctx) {
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#FF1493';
     ctx.font = '18px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Lives: ' + this.lives, this.x, this.y);
 
-    // Draw heart icons properly positioned next to the text
     for (let i = 0; i < this.lives; i++) {
-      const heartX = this.x + 70 + i * 25; // Start after "Lives: " text
-      const heartY = this.y - 12; // Align with text baseline
+      const heartX = this.x + 70 + i * 25;
+      const heartY = this.y - 12;
 
-      // Draw heart shape
-      ctx.fillStyle = 'red';
+      ctx.fillStyle = '#FF69B4';
       ctx.fillRect(heartX, heartY, 15, 15); // Main heart body
       ctx.fillRect(heartX - 5, heartY - 5, 5, 5); // Left top bump
       ctx.fillRect(heartX + 15, heartY - 5, 5, 5); // Right top bump
@@ -120,13 +121,12 @@ class Stars extends Sprite {
   }
 
   draw(ctx) {
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#FF1493';
     ctx.font = '18px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Stars: ' + this.stars, this.x, this.y);
 
-    // Draw star icon properly positioned after text
-    ctx.fillStyle = 'gold';
+    ctx.fillStyle = '#FFD700';
     ctx.beginPath();
     const starX = this.x + 70; // Position after "Stars: " text
     const starY = this.y - 8;
@@ -158,7 +158,7 @@ class ShieldConversionButton extends Sprite {
     this.y = y;
     this.width = 160;
     this.height = 40;
-    this.shieldsRequired = 20;
+    this.shieldsRequired = SHIELDS_FOR_LIFE_CONVERSION;
   }
 
   update(sprites, keys, mouse) {
@@ -187,7 +187,7 @@ class ShieldConversionButton extends Sprite {
     if (!player || player.totalShieldsPurchased < this.shieldsRequired) return;
 
     // Button background - purple/gold theme
-    ctx.fillStyle = 'rgba(147, 51, 234, 0.9)';
+    ctx.fillStyle = 'rgba(255, 182, 193, 0.9)';
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     // Button border
@@ -222,6 +222,19 @@ class Lose extends Sprite {
     super();
     this.x = x;
     this.y = y;
+
+    // Stop background music
+    const bgMusic = game.sprites.find(
+      (sprite) => sprite instanceof BackgroundMusic
+    );
+    if (bgMusic && bgMusic.sound && bgMusic.sound.audio) {
+      bgMusic.sound.audio.pause();
+      bgMusic.sound.audio.currentTime = 0;
+    }
+
+    // Play lose sound effect
+    this.loseSound = new Audio('assets/sounds/YouLoseSoundEffect.mp3');
+    this.loseSound.play();
   }
 
   update(sprites, keys) {
@@ -246,6 +259,59 @@ class Lose extends Sprite {
       'Refresh to play again',
       game.canvas.width / 2,
       game.canvas.height / 2 + 60
+    );
+  }
+}
+
+class Win extends Sprite {
+  constructor(x, y) {
+    super();
+    this.x = x;
+    this.y = y;
+
+    // Stop background music
+    const bgMusic = game.sprites.find(
+      (sprite) => sprite instanceof BackgroundMusic
+    );
+    if (bgMusic && bgMusic.sound && bgMusic.sound.audio) {
+      bgMusic.sound.audio.pause();
+      bgMusic.sound.audio.currentTime = 0;
+    }
+
+    // Play win sound effect
+    this.winSound = new Audio('assets/sounds/YouWinSoundEffect.mp3');
+    this.winSound.play();
+  }
+
+  update(sprites, keys) {
+    return false;
+  }
+
+  draw(ctx) {
+    // Draw semi-transparent background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
+
+    // Draw victory text centered
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('YOU WIN!', game.canvas.width / 2, game.canvas.height / 2);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText(
+      'Congratulations! You completed all levels!',
+      game.canvas.width / 2,
+      game.canvas.height / 2 + 60
+    );
+
+    ctx.font = '18px Arial';
+    ctx.fillText(
+      'Refresh to play again',
+      game.canvas.width / 2,
+      game.canvas.height / 2 + 100
     );
   }
 }

@@ -1,7 +1,7 @@
 // Game classes
 
 class Player extends Sprite {
-  constructor(x, y, width, height, speed) {
+  constructor(x, y, width, height, speed, level = 1) {
     super();
     this.x = x;
     this.y = y;
@@ -9,17 +9,31 @@ class Player extends Sprite {
     this.height = height;
     this.speed = speed;
     this.jumpSpeed = 0;
-    this.gravity = 0.5;
+    this.gravity = GRAVITY;
     this.groundY = y;
     this.isJumping = false;
     this.shootCooldown = 0;
     this.stars = 0;
     this.hasShield = false;
-    this.shieldCost = 15;
-    this.lifeCost = 40; // Cost to buy extra life
+    this.level = level;
+    this.shieldCost = this.getShieldCost();
+    this.lifeCost = LIFE_COST;
     this.totalShieldsPurchased = 0; // Track total shields bought
     this.shootSound = new SoundManager('assets/sounds/jump.wav');
     this.invincibilityTimer = 0; // Prevent repeated damage
+  }
+
+  getShieldCost() {
+    switch (this.level) {
+      case 1:
+        return 2; // Level 1: 2 stars
+      case 2:
+        return 4; // Level 2: 4 stars
+      case 3:
+        return 8; // Level 3: 8 stars
+      default:
+        return 5;
+    }
   }
 
   update(sprites, keys) {
@@ -33,7 +47,7 @@ class Player extends Sprite {
 
     // Jumping
     if (keys['ArrowUp'] && !this.isJumping) {
-      this.jumpSpeed = -12;
+      this.jumpSpeed = JUMP_SPEED;
       this.isJumping = true;
     }
 
@@ -54,9 +68,15 @@ class Player extends Sprite {
         sfx.play();
       }
       sprites.push(
-        new Bullet(this.x + this.width / 2 - 2.5, this.y - 10, 5, 10, 8)
+        new Bullet(
+          this.x + this.width / 2 - BULLET_WIDTH / 2,
+          this.y - 10,
+          BULLET_WIDTH,
+          BULLET_HEIGHT,
+          BULLET_SPEED
+        )
       );
-      this.shootCooldown = 15;
+      this.shootCooldown = SHOOT_COOLDOWN_FRAMES;
     }
 
     // Shield and life purchases now handled by UI buttons
@@ -66,7 +86,7 @@ class Player extends Sprite {
       sprites.forEach((sprite) => {
         if (sprite instanceof Obstacle && this.isColliding(sprite)) {
           this.takeDamage(sprites);
-          this.invincibilityTimer = 60; // 1 second of invincibility
+          this.invincibilityTimer = INVINCIBILITY_FRAMES;
         }
       });
     }
@@ -109,10 +129,6 @@ class Player extends Sprite {
       if (starsDisplay) {
         starsDisplay.updateStars(this.stars);
       }
-      console.log(
-        'Shield activated! Total shields purchased: ' +
-          this.totalShieldsPurchased
-      );
       return true;
     }
     return false;
@@ -124,10 +140,6 @@ class Player extends Sprite {
       const lives = sprites.find((sprite) => sprite instanceof Lives);
       if (lives) {
         lives.addLife();
-        console.log(
-          'Converted 20 shields to +1 life! Shields remaining: ' +
-            this.totalShieldsPurchased
-        );
         return true;
       }
     }
@@ -137,7 +149,6 @@ class Player extends Sprite {
   takeDamage(sprites) {
     if (this.hasShield) {
       this.hasShield = false;
-      console.log('Shield blocked damage! Shield destroyed.');
     } else {
       const lives = sprites.find((sprite) => sprite instanceof Lives);
       if (lives) {
@@ -167,7 +178,7 @@ class Player extends Sprite {
       ctx.globalAlpha = 0.5;
     }
 
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#FF69B4';
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     ctx.globalAlpha = 1.0; // Reset alpha
@@ -180,11 +191,11 @@ class Player extends Sprite {
     }
 
     // Face
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = '#FFE4E1';
     ctx.fillRect(this.x + 10, this.y + 10, 5, 5);
     ctx.fillRect(this.x + 25, this.y + 10, 5, 5);
 
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = '#FF1493';
     ctx.fillRect(this.x + 15, this.y + 25, 10, 3);
   }
 }
