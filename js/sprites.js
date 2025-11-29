@@ -4,6 +4,41 @@
  */
 
 /**
+ * Animated feedback text that rises and fades out
+ * @class FeedbackText
+ * @extends Sprite
+ */
+class FeedbackText extends Sprite {
+  constructor(x, y, text, color = '#00FF00') {
+    super();
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.color = color;
+    this.opacity = 1.0;
+    this.lifetime = 60; // 1 second at 60 FPS
+  }
+
+  update(sprites, keys) {
+    this.y -= 2; // Rise up
+    this.opacity -= 0.02; // Fade out
+    this.lifetime--;
+    return this.lifetime <= 0 || this.opacity <= 0;
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    ctx.fillStyle = this.color;
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.restore();
+  }
+}
+
+/**
  * Displays static text on the canvas
  * @class TextSprite
  * @extends Sprite
@@ -310,23 +345,11 @@ class CampfireAnimation extends AnimatedSprite {
   }
 
   /**
-   * Renders campfire with girly pink/purple color blend effects
    * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
    */
   draw(ctx) {
     if (!this.visible) return;
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = 'rgba(255, 182, 193, 0.8)';
     super.draw(ctx);
-    ctx.globalCompositeOperation = 'screen';
-    ctx.fillStyle = 'rgba(255, 20, 147, 0.4)';
-    ctx.fillRect(this.x, this.y, this.frameWidth, this.spriteHeight);
-    ctx.globalCompositeOperation = 'soft-light';
-    ctx.fillStyle = 'rgba(186, 85, 211, 0.3)';
-    ctx.fillRect(this.x, this.y, this.frameWidth, this.spriteHeight);
-    ctx.restore();
   }
 }
 

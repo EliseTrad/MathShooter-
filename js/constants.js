@@ -111,9 +111,6 @@ const JUMP_SPEED = -12;
 // TIMING & DELAYS
 // ============================================================================
 
-/** @const {number} Milliseconds to wait for canvas sizing before positioning player */
-const PLAYER_POSITION_DELAY = 100;
-
 /** @const {number} Frames of invincibility after taking damage (60fps = 1 second) */
 const INVINCIBILITY_FRAMES = 60;
 

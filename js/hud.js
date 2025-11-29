@@ -38,11 +38,11 @@ class ShieldButton extends Sprite {
 
     // Button background
     if (hasShield) {
-      ctx.fillStyle = 'rgba(194, 86, 170, 0.5)'; // Disabled when shield active
+      ctx.fillStyle = 'rgba(194, 86, 170, 0.5)'; 
     } else if (canAfford) {
-      ctx.fillStyle = 'rgba(49, 8, 40, 0.8)'; // Green when affordable
+      ctx.fillStyle = 'rgba(49, 8, 40, 0.8)'; 
     } else {
-      ctx.fillStyle = 'rgba(212, 23, 149, 0.5)'; // Gray when can't afford
+      ctx.fillStyle = 'rgba(212, 23, 149, 0.5)'; 
     }
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
@@ -297,21 +297,54 @@ class Win extends Sprite {
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('YOU WIN!', game.canvas.width / 2, game.canvas.height / 2);
+    ctx.fillText(
+      'YOU WIN!',
+      game.canvas.width / 2,
+      game.canvas.height / 2 - 80
+    );
 
     ctx.fillStyle = 'white';
     ctx.font = '24px Arial';
     ctx.fillText(
       'Congratulations! You completed all levels!',
       game.canvas.width / 2,
-      game.canvas.height / 2 + 60
+      game.canvas.height / 2 - 20
     );
 
+    // Display scores for each level
+    const player = game.sprites.find((sprite) => sprite instanceof Player);
+    if (player && player.levelScores) {
+      ctx.fillStyle = '#90EE90';
+      ctx.font = 'bold 20px Arial';
+      ctx.fillText(
+        'Your Scores:',
+        game.canvas.width / 2,
+        game.canvas.height / 2 + 20
+      );
+
+      ctx.fillStyle = 'white';
+      ctx.font = '18px Arial';
+      let yOffset = 50;
+
+      for (let level = 1; level <= 3; level++) {
+        if (player.levelScores[level]) {
+          const score = player.levelScores[level];
+          ctx.fillText(
+            `Level ${level}: ${score.correct} correct out of ${score.total} questions`,
+            game.canvas.width / 2,
+            game.canvas.height / 2 + yOffset
+          );
+          yOffset += 30;
+        }
+      }
+    }
+
+    ctx.fillStyle = '#FFD700';
     ctx.font = '18px Arial';
     ctx.fillText(
       'Refresh to play again',
       game.canvas.width / 2,
-      game.canvas.height / 2 + 100
+      game.canvas.height / 2 + 160
     );
   }
 }

@@ -34,6 +34,25 @@ class Number extends Sprite {
         player.addStars(1);
       }
 
+      // Show positive feedback
+      const messages = [
+        'Well Done!',
+        'Great Job!',
+        'Excellent!',
+        'Perfect!',
+        'Nice Shot!',
+      ];
+      const randomMessage =
+        messages[Math.floor(Math.random() * messages.length)];
+      game.sprites.push(
+        new FeedbackText(
+          this.x + this.width / 2,
+          this.y,
+          randomMessage,
+          '#00FF00'
+        )
+      );
+
       const equation = game.sprites.find(
         (sprite) => sprite instanceof EquationDisplay
       );
@@ -66,10 +85,32 @@ class Number extends Sprite {
       const player = game.sprites.find((sprite) => sprite instanceof Player);
       if (player && player.hasShield) {
         player.hasShield = false;
+        // Show shield broken feedback
+        game.sprites.push(
+          new FeedbackText(
+            this.x + this.width / 2,
+            this.y,
+            'Shield Lost!',
+            '#FFA500'
+          )
+        );
       } else {
         const lives = game.sprites.find((sprite) => sprite instanceof Lives);
         if (lives) {
           lives.removeOneLife();
+          // Show negative feedback
+          const messages = ['Hard Luck!', 'Oops!', 'Try Again!', 'Miss!'];
+          const randomMessage =
+            messages[Math.floor(Math.random() * messages.length)];
+          game.sprites.push(
+            new FeedbackText(
+              this.x + this.width / 2,
+              this.y,
+              randomMessage,
+              '#FF0000'
+            )
+          );
+
           if (lives.lives <= 0) {
             game.sprites.push(
               new Lose(game.canvas.width / 2, game.canvas.height / 2)
@@ -231,17 +272,7 @@ class EquationDisplay extends Sprite {
   draw(ctx) {
     const equation = `${this.num1} ${this.operation} ${this.num2} = ?`;
 
-    // Center the equation horizontally
-    const boxWidth = 200;
-    const boxX = (game.canvas.width - boxWidth) / 2;
-
-    ctx.fillStyle = 'rgba(255, 192, 203, 0.9)';
-    ctx.fillRect(boxX - 10, this.y - 30, boxWidth, 50);
-
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(boxX - 10, this.y - 30, boxWidth, 50);
-
+    // Display equation without frame
     ctx.fillStyle = '#FF1493';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
@@ -340,13 +371,13 @@ class NumberGenerator extends Sprite {
   getNumberSpeed() {
     switch (this.level) {
       case 1:
-        return 1.0; // Slower speed for beginners
+        return 1.3; // Slower speed for beginners
       case 2:
-        return 2.0; // Faster but balanced for Level 2
+        return 2.3; // Faster but balanced for Level 2
       case 3:
-        return 3.5;
+        return 3; // Challenging
       default:
-        return 3.5;
+        return 2;
     }
   }
 
@@ -422,14 +453,27 @@ class NumberGenerator extends Sprite {
     this.correctAnswersCount++;
 
     if (this.correctAnswersCount >= this.targetCorrectAnswers) {
-      if (this.level === 1) {
-        game.changeLevel(5);
-      } else if (this.level === 2) {
-        game.changeLevel(6);
-      } else {
-        game.sprites.push(
-          new Win(game.canvas.width / 2, game.canvas.height / 2)
-        );
+      // Save level score to player
+      const player = game.sprites.find((sprite) => sprite instanceof Player);
+      if (player) {
+        player.levelScores[this.level] = {
+          correct: this.correctAnswersCount,
+          total: this.questionsAsked,
+        };
+      }
+
+      switch (this.level) {
+        case 1:
+          game.changeLevel(5);
+          break;
+        case 2:
+          game.changeLevel(6);
+          break;
+        default:
+          game.sprites.push(
+            new Win(game.canvas.width / 2, game.canvas.height / 2)
+          );
+          break;
       }
     } else if (this.questionsAsked >= this.totalQuestions) {
       game.sprites.push(

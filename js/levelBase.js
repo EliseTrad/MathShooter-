@@ -24,13 +24,14 @@ class GameplayLevel extends Level {
       player.stars = existingPlayer.stars;
       player.hasShield = existingPlayer.hasShield;
       player.totalShieldsPurchased = existingPlayer.totalShieldsPurchased;
+      player.levelScores = existingPlayer.levelScores || {};
     }
 
-    setTimeout(() => {
-      player.x = (this.game.canvas.width - player.width) / 2;
-      player.y = this.game.canvas.height - PLAYER_GROUND_OFFSET;
-      player.groundY = player.y;
-    }, PLAYER_POSITION_DELAY);
+    // Set player position immediately
+    player.x = (this.game.canvas.width - player.width) / 2;
+    player.y = this.game.canvas.height - PLAYER_GROUND_OFFSET;
+    player.groundY = player.y;
+
     this.game.addSprite(player);
 
     this.game.addSprite(new Lives(HUD_LEFT_MARGIN, HUD_LIVES_Y));

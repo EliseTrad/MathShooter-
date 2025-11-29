@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CSIS250 GameEngine</title>
+    <title>MathShooter+</title>
   </head>
   <body style="margin: 0; background-color: gray">
     <canvas
@@ -8,6 +8,8 @@
       style="background-color: white; display: block"
     ></canvas>
 
+    <!-- Dynamic canvas sizing: hardcoded width/height values did not display properly,
+         so switched to window dimensions for responsive full-screen gameplay -->
     <script>
       const canvas = document.getElementById('canvas');
       function resize() {

@@ -7,6 +7,24 @@ Audience:** Ages 8-12
 
 ---
 
+## Table of Contents
+
+1. [Game Concept and Scope](#1-game-concept-and-scope)
+2. [Core Game Mechanics and Rules](#2-core-game-mechanics-and-rules)
+3. [Game World Design](#3-game-world-design)
+4. [Characters](#4-characters)
+5. [Story Arc and Narrative Progression](#5-story-arc-and-narrative-progression)
+6. [Level Design and Difficulty Progression](#6-level-design-and-difficulty-progression)
+7. [Art Style and Visuals](#7-art-style-and-visuals)
+8. [Audio Design](#8-audio-design)
+9. [User Interface Design](#9-user-interface-design)
+10. [Technical Requirements](#10-technical-requirements)
+11. [Marketing and Promotion](#11-marketing-and-promotion)
+12. [Development Schedule](#12-development-schedule)
+13. [Appendices](#13-appendices)
+
+---
+
 ## 1. Game Concept and Scope
 
 **Core Concept:** Math Shooter+ is an educational arcade shooter where players
@@ -147,14 +165,14 @@ validation), game completion (full mastery)
 **Level 1 - Forest Camp (Beginner):**
 
 - Target: 5 correct / 10 total questions | Operations: +, - (range 1-10)
-- Speed: 1.0× fall speed, 150-frame spawn delay | Max 3 numbers on screen
+- Speed: 1.3× fall speed, 150-frame spawn delay | Max 3 numbers on screen
 - Special: Campfire animation, no obstacles, 40% correct answer rate
 - Learning Focus: Core mechanics, equation solving rhythm, resource introduction
 
 **Level 2 - Obstacle Course (Intermediate):**
 
 - Target: 10 correct / 15 total questions | Operations: +, - (range 1-10)
-- Speed: 2.0× fall speed, 100-frame spawn delay | Max 5 numbers on screen
+- Speed: 2.3× fall speed, 100-frame spawn delay | Max 5 numbers on screen
 - Mechanics: Obstacles spawn from missed correct answers, 1.5× obstacle speed
 - Penalty: Wrong answer spawns 2 additional numbers | 35% correct answer rate
 - Learning Focus: Obstacle avoidance, strategic positioning, resource pressure
@@ -162,14 +180,14 @@ validation), game completion (full mastery)
 **Level 3 - Advanced Arena (Hard):**
 
 - Target: 15 correct / 20 total questions | Operations: +, -, × (mult range 1-5)
-- Speed: 3.5× fall speed, 60-frame spawn delay | Max 7 numbers on screen
+- Speed: 3.0× fall speed, 60-frame spawn delay | Max 7 numbers on screen
 - Mechanics: 3.0× obstacle speed, multiplication introduced | 30% correct answer
   rate
 - Challenge: Expensive shields (8 stars), sustained performance required
 - Learning Focus: Multiplication mastery, optimal resource management,
   multi-tasking
 
-**Difficulty Scaling:** Progressive increases in speed (1.0→3.5×), spawn rate
+**Difficulty Scaling:** Progressive increases in speed (1.3→3.0×), spawn rate
 (150→60 frames), question count (10→20), complexity (addition→multiplication),
 and shield cost (2→8 stars) create smooth learning curve
 
@@ -179,5 +197,145 @@ reinforces learning
 
 ---
 
-**Version:** 2.0 | **Last Updated:** November 29, 2025 | **Maintained By:**
-Elise
+## 7. Art Style and Visuals
+
+**Visual Direction:** Minimalist geometric design with vibrant, child-friendly
+colors emphasizing clarity and educational focus
+
+**Color Palette:**
+
+- Primary: Bright blue (#4169E1) player, light pink (#FFB6C1) numbers, deep pink
+  (#FF1493) UI
+- Accents: Gold (#FFD700) stars, red (#FF0000) obstacles, cyan (#00FFFF) shields
+- Background: Black (#000000) for maximum contrast
+
+**Character Design:** 40×40px geometric shapes - blue rectangle player with
+white eyes and red smile; uniform pink number squares; red obstacle blocks
+
+**Environmental Elements:** Campfire animation (80×64px, 4 frames), ground line,
+white-bordered equation display box
+
+**Visual Effects:** Cyan shield glow, invincibility flashing (opacity 0.3-1.0),
+consistent 2-3px stroke widths
+
+---
+
+## 8. Audio Design
+
+**Music:** Looping upbeat electronic background track (background.mp3, 120 BPM,
+2-3 min loop, 30-40% volume)
+
+**Sound Effects:**
+
+- Win: Triumphant ascending chime (win.mp3, ~2s)
+- Lose: Gentle descending tone (lose.mp3, ~1.5s)
+- Jump/Shoot: Short pop effect (jump.wav, ~0.3s)
+
+**Behavior:** Music stops on win/lose, starts on spacebar press, effects play
+independently without overlap
+
+---
+
+## 9. User Interface Design
+
+**Main Menu:** 4 centered buttons (200×50px) - "Start Game", "How to Play",
+"Story", "Controls"; hover color shift
+
+**Pause Menu:** Semi-transparent overlay, 3 buttons ("Continue", "Reset Level",
+"Main Menu"); shortcuts P/ESC/C
+
+**HUD (Top-Left):** Heart row (lives), star count, "Buy Shield" button with
+dynamic cost, conversion button after 20 shields
+
+**Equation Display:** Top-center white box (200×60px), 28px Arial text,
+regenerates per answer
+
+**Win/Lose Screens:** Large centered text (72px), "Press SPACE" instruction,
+dimmed background
+
+---
+
+## 10. Technical Requirements
+
+**Platform:** Web browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+);
+800×600 minimum resolution
+
+**Software:** HTML5 Canvas, Web Audio API, JavaScript ES5/ES6; no plugins
+required
+
+**Hardware:** Minimum dual-core CPU, 2GB RAM, integrated graphics; keyboard and
+mouse required
+
+**Performance:** 60 FPS locked, <10MB memory, <3s load time, 20-50 active
+sprites
+
+**Compatibility:** Safari audio autoplay restrictions; mobile touch not
+supported; IE11 not supported
+
+---
+
+## 11. Marketing and Promotion
+
+**Target:** Elementary/middle students (8-12), parents, educators seeking math
+practice tools
+
+**Distribution:** GitHub Pages hosting, educational platforms, teacher resource
+sites, social media edu-gaming groups
+
+**Selling Points:** Free web-based, Common Core aligned (CCSS.MATH 1-3.OA),
+engaging non-traditional edutainment, peer-created
+
+**Materials:** Gameplay video (1-2 min), screenshots, educational brief for
+teachers, GitHub README
+
+---
+
+## 12. Development Schedule
+
+**Timeline:** 8-10 weeks (semester project)
+
+- ✅ Weeks 1-2: Pre-production (GDD, TDD, assets, repo setup)
+- ✅ Weeks 3-5: Core development (engine, player, collision, HUD)
+- ✅ Weeks 6-7: Content (3 levels, menus, audio, animations)
+- ✅ Week 8: Testing and polish (bug fixes, cleanup, balance)
+- 🔄 Weeks 9-10: Submission (final testing, docs, presentation, demo)
+
+---
+
+## 13. Appendices
+
+**Appendix A - Difficulty Scaling:**
+
+| Parameter       | Level 1 | Level 2 | Level 3 |
+| --------------- | ------- | ------- | ------- |
+| Correct Answers | 5       | 10      | 15      |
+| Max Questions   | 10      | 15      | 20      |
+| Fall Speed      | 1.3×    | 2.3×    | 3.0×    |
+| Spawn Delay     | 150     | 100     | 60      |
+| Max Numbers     | 3       | 5       | 7       |
+| Shield Cost     | 2       | 4       | 8       |
+| Operations      | +, -    | +, -    | +, -, × |
+
+**Appendix B - Controls:**
+
+- Arrow Left/Right: Move
+- Spacebar: Jump + Shoot + Continue
+- P/Escape: Pause
+- C: Continue from pause
+- Mouse: Click buttons
+
+**Appendix C - Learning Alignment:**
+
+- Common Core: CCSS.MATH 1-3.OA (fluency in addition, subtraction,
+  multiplication)
+- 21st Century: Critical thinking, problem-solving, adaptability, persistence
+
+**Appendix D - Future Enhancements:**
+
+- LocalStorage high scores, difficulty settings, division operation, touch
+  controls, power-ups, level editor, multiplayer, achievements
+
+---
+
+**Document Status:** Complete | **Version:** 2.0 | **Last Updated:** November
+29, 2025 | **Maintained By:** Elise
